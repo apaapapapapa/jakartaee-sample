@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head><title>明細一覧</title></h:head>
+<h:body>
+  <h:form id="form">
+    <h:messages globalOnly="true"/>
+    <h:dataTable value="#{detailListBean.rows}" var="row">
+      <h:column>
+        <f:facet name="header">選択</f:facet>
+        <h:selectBooleanCheckbox value="#{row.selected}">
+          <f:ajax event="change" render="@none"/>
+        </h:selectBooleanCheckbox>
+      </h:column>
+      <h:column>
+        <f:facet name="header">ID</f:facet>#{row.id}
+      </h:column>
+      <h:column>
+        <f:facet name="header">タイトル</f:facet>#{row.title}
+      </h:column>
+      <h:column>
+        <f:facet name="header">状態</f:facet>#{row.status}
+      </h:column>
+    </h:dataTable>
+
+    <h:commandButton value="申請" action="#{detailListBean.submit}"/>
+  </h:form>
+</h:body>
+</html>
