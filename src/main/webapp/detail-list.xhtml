@@ -2,29 +2,80 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
-<h:head><title>明細一覧</title></h:head>
-<h:body>
-  <h:form id="form">
-    <h:messages globalOnly="true"/>
-    <h:dataTable value="#{detailListBean.rows}" var="row">
-      <h:column>
-        <f:facet name="header">選択</f:facet>
-        <h:selectBooleanCheckbox value="#{row.selected}">
-          <f:ajax event="change" render="@none"/>
-        </h:selectBooleanCheckbox>
-      </h:column>
-      <h:column>
-        <f:facet name="header">ID</f:facet>#{row.id}
-      </h:column>
-      <h:column>
-        <f:facet name="header">タイトル</f:facet>#{row.title}
-      </h:column>
-      <h:column>
-        <f:facet name="header">状態</f:facet>#{row.status}
-      </h:column>
-    </h:dataTable>
+<h:head>
+  <title>明細一覧</title>
+  <h:outputStylesheet library="webjars" name="bootstrap/5.3.8/css/bootstrap.min.css" />
+</h:head>
+<h:body class="p-4 bg-light">
 
-    <h:commandButton value="申請" action="#{detailListBean.submit}"/>
-  </h:form>
+  <div class="container">
+    <h1 class="h3 mb-3">明細一覧</h1>
+
+    <h:form id="form" styleClass="card shadow-sm">
+      <div class="card-body">
+
+        <h:messages globalOnly="true" styleClass="alert alert-info" />
+
+        <h:dataTable value="#{detailListBean.rows}" var="row"
+                     styleClass="table table-striped table-hover align-middle"
+                     headerClass="table-light"
+                     rowClasses="">
+
+          <h:column>
+            <f:facet name="header">選択</f:facet>
+            <h:selectBooleanCheckbox value="#{detailListBean.form.selected[row.id]}" />
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">ID</f:facet>
+            #{row.id}
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">タイトル</f:facet>
+            #{row.title}
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">状態</f:facet>
+            #{row.status}
+          </h:column>
+        </h:dataTable>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-12">
+            <h:outputLabel for="approver" value="承認者" styleClass="form-label"/>
+            <h:inputText id="approver"
+                        value="#{detailListBean.form.approverName}"
+                        required="true"
+                        requiredMessage="承認者を入力してください"
+                        styleClass="form-control"/>
+            <h:messages for="approver" styleClass="text-danger small"/>
+          </div>
+
+          <div class="col-md-12">
+            <h:outputLabel for="reviewer" value="検閲者" styleClass="form-label"/>
+            <h:inputText id="reviewer"
+                        value="#{detailListBean.form.reviewerName}"
+                        required="true"
+                        requiredMessage="検閲者を入力してください"
+                        styleClass="form-control"/>
+            <h:messages for="reviewer" styleClass="text-danger small"/>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <h:commandButton value="申請"
+                           action="#{detailListBean.submit}"
+                           styleClass="btn btn-primary" />
+          <h:commandButton value="再読込"
+                           action="#{detailListBean.init}"
+                           immediate="true"
+                           styleClass="btn btn-outline-secondary" />
+        </div>
+      </div>
+    </h:form>
+  </div>
+
 </h:body>
 </html>
