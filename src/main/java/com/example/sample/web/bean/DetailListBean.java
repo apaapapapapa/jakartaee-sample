@@ -39,13 +39,13 @@ public class DetailListBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        String userId = loginUserId();
+        final String userId = loginUserId();
         rows = detailService.getListForLoginUser(userId);
     }
 
     public void submit() {
         try {
-            String userId = loginUserId();
+            final String userId = loginUserId();
             detailService.apply(form.getSelectedIds(), userId);
             addInfo("申請が完了しました。");
             // 再読み込み
@@ -59,16 +59,16 @@ public class DetailListBean implements Serializable {
     }
 
     private String loginUserId() {
-        return "user1"; // 例: 社員番号やログインID
+        return "user1"; 
     }
 
-    private void addInfo(String msg) {
+    private void addInfo(final String msg) {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, msg, null));
     }
-    private void addWarn(String msg) {
+    private void addWarn(final String msg) {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, msg, null));
     }
-    private void addError(String msg) {
+    private void addError(final String msg) {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, null));
     }
 

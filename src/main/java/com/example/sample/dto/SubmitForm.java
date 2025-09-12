@@ -1,21 +1,27 @@
 package com.example.sample.dto;
 
-import jakarta.validation.constraints.NotEmpty;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-@Getter
-@Setter
 public class SubmitForm implements Serializable {
-
+    
     private static final long serialVersionUID = 1L;
 
-    @NotEmpty(message = "申請する明細を選択してください。")
-    private List<Long> selectedIds = new ArrayList<>();
+    private final List<Long> selectedIds = new ArrayList<>();
+
+    public List<Long> getSelectedIds() {
+        return Collections.unmodifiableList(selectedIds);
+    }
+
+    public void setSelectedIds(Collection<Long> ids) {
+        selectedIds.clear();
+        if (ids != null) {
+            selectedIds.addAll(ids);
+        }
+    }
 
     public void clear() {
         selectedIds.clear();
