@@ -3,40 +3,52 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+      
 <h:head>
   <title>明細一覧</title>
   <h:outputStylesheet library="webjars" name="bootstrap/5.3.8/css/bootstrap.min.css" />
 </h:head>
+
+<f:metadata>
+    <f:viewParam name="userId" value="#{detailListBean.form.loginUserId}" />
+</f:metadata>
+
 <h:body class="p-4 bg-light">
 
   <div class="container">
 
-    <f:metadata>
-      <f:viewParam name="userId" value="#{detailListBean.form.loginUserId}" />
-    </f:metadata>
-
     <h:form id="form" styleClass="card shadow-sm">
       <div class="card-body">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h:panelGroup id="currentuser" layout="block" styleClass="alert alert-secondary py-2 px-3 mb-0">
-            現在のユーザー：<strong><h:outputText value="#{detailListBean.form.loginUserId}" /></strong>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+
+          <h:panelGroup id="currentuser"
+                        layout="block"
+                        styleClass="alert alert-secondary d-flex align-items-center gap-2 py-2 px-3 mb-0 shadow-sm">
+            <span class="fw-semibold">現在のユーザー：</span>
+            <span class="badge text-bg-light text-secondary fs-6">
+              <h:outputText value="#{detailListBean.form.loginUserId}" />
+            </span>
           </h:panelGroup>
 
-          <div class="d-flex align-items-center gap-2">
-            <label for="userSelect" class="form-label mb-0">ユーザー切替</label>
-            <h:selectOneMenu id="userSelect"
-                             value="#{detailListBean.form.loginUserId}"
-                             styleClass="form-select">
-              <f:selectItem itemValue="user1" itemLabel="user1" />
-              <f:selectItem itemValue="user2" itemLabel="user2" />
-              <f:selectItem itemValue="user3" itemLabel="user3" />
-              <f:ajax execute="@this"
-                      listener="#{detailListBean.init}"
-                      render="form:currentuser form:dataTable form:approver form:reviewer form:msgs" />
-            </h:selectOneMenu>
+          <div class="d-flex align-items-center">
+            <div class="input-group input-group-sm" style="min-width: 240px;">
+              <span class="input-group-text">ユーザー切替</span>
+              <h:selectOneMenu id="userSelect"
+                              value="#{detailListBean.form.loginUserId}"
+                              styleClass="form-select">
+                <f:selectItem itemValue="user1" itemLabel="user1" />
+                <f:selectItem itemValue="user2" itemLabel="user2" />
+                <f:selectItem itemValue="user3" itemLabel="user3" />
+                <f:ajax execute="@this"
+                        listener="#{detailListBean.init}"
+                        render="form:currentuser form:dataTable form:approver form:reviewer form:msgs" />
+              </h:selectOneMenu>
+            </div>
           </div>
+
         </div>
+
 
         <h1 class="h3 mb-3">明細一覧</h1>
 
