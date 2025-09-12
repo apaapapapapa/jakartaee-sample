@@ -9,36 +9,41 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
+import lombok.NoArgsConstructor;
 
 @ApplicationScoped
+@NoArgsConstructor
 public class DetailRepository {
 
     @PersistenceContext
-    EntityManager em;
+    private EntityManager entityManager;
 
-    public List<Detail> findByUserId(String userId) {
-        return em.createQuery(
+
+    public List<Detail> findByUserId(final String userId) {
+        return entityManager.createQuery(
                 "SELECT d FROM Detail d WHERE d.ownerUserId = :uid ORDER BY d.id DESC",
                 Detail.class
         ).setParameter("uid", userId).getResultList();
     }
 
-    public List<Detail> findByIdsForUser(List<Long> ids, String userId) {
+    public List<Detail> findByIdsForUser(final List<Long> ids, final String userId) {
+        final List<Detail> result;
         if (ids == null || ids.isEmpty()) {
-            return List.of();
+            result = List.of();
+        } else {
+            result = entityManager.createQuery(
+                    "SELECT d FROM Detail d WHERE d.id IN :ids AND d.ownerUserId = :uid",
+                    Detail.class
+            ).setParameter("ids", ids)
+             .setParameter("uid", userId)
+             .getResultList();
         }
-        return em.createQuery(
-                "SELECT d FROM Detail d WHERE d.id IN :ids AND d.ownerUserId = :uid",
-                Detail.class
-        ).setParameter("ids", ids)
-         .setParameter("uid", userId)
-         .getResultList();
+        return result;
     }
 
-    public void markRequestedWithLock(Detail d) {
-        // 悲観ロック
-        em.lock(d, LockModeType.PESSIMISTIC_WRITE);
-        d.setStatus(Status.REQUESTED);
-        em.merge(d);
+    public void markRequestedWithLock(final Detail detail) {
+        entityManager.lock(detail, LockModeType.PESSIMISTIC_WRITE);
+        detail.setStatus(Status.REQUESTED);
+        entityManager.merge(detail);
     }
 }

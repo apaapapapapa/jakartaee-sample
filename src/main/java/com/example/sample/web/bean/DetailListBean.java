@@ -1,9 +1,9 @@
 package com.example.sample.web.bean;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.faces.view.ViewScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import lombok.Getter;
@@ -20,65 +20,77 @@ import com.example.sample.service.DetailService;
 @Named
 @ViewScoped
 public class DetailListBean implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
 
     private DetailService detailService;
 
-    @Inject
-    public DetailListBean(DetailService detailService){
-        this.detailService = detailService;
-        this.form = new DetailSubmitForm();
-    }
-
     @Getter
     @Setter
-    private List<DetailRowView> rows;
+    private transient List<DetailRowView> rows;
 
     @Getter
     @Setter
     private DetailSubmitForm form;
 
-    @PostConstruct
-    public void init() {
-        reloadRows(loginUserId());
+    /**
+     * Default constructor.
+     */
+    @Inject
+    public DetailListBean(final DetailService detailService) {
+        this.detailService = detailService;
+        this.form = new DetailSubmitForm();
     }
 
-    private void reloadRows(String userId){
+    @PostConstruct
+    public void init() {
+        String userId = form.getLoginUserId();
+        if (userId == null || userId.isBlank()) {
+            userId = "user1";
+            form.setLoginUserId(userId);
+        }
+        reloadRows(userId);
+    }
+
+    private void reloadRows(final String userId) {
         rows = detailService.getListForLoginUser(userId);
-        var idsOnScreen = rows.stream().map(DetailRowView::getId).toList();
+        final List<Long> idsOnScreen = rows.stream()
+                .map(DetailRowView::getDetailId)
+                .toList();
         form.getSelected().keySet().retainAll(idsOnScreen);
-        idsOnScreen.forEach(id -> form.getSelected().putIfAbsent(id, false));
+        idsOnScreen.forEach(detailId -> form.getSelected().putIfAbsent(detailId, false));
     }
 
     public void submit() {
         try {
-            final String userId = loginUserId();
+            final String userId = form.getLoginUserId();
             final List<Long> selectedIds = form.getSelectedIds();
             detailService.apply(selectedIds, userId);
             addInfo("申請が完了しました。");
-            // 再読み込み
-            reloadRows(userId);  
+            reloadRows(userId);
             form.clearSelections();
-        } catch (BusinessException ex) {
+        } catch (final BusinessException ex) {
             addWarn(ex.getMessage());
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             addError("エラーが発生しました。管理者に連絡してください。");
         }
     }
 
-    private String loginUserId() {
-        return "user1"; 
-    }
-
     private void addInfo(final String msg) {
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, msg, null));
-    }
-    private void addWarn(final String msg) {
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, msg, null));
-    }
-    private void addError(final String msg) {
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, null));
+        FacesContext
+                .getCurrentInstance()
+                .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, msg, null));
     }
 
+    private void addWarn(final String msg) {
+        FacesContext
+                .getCurrentInstance()
+                .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, msg, null));
+    }
+
+    private void addError(final String msg) {
+        FacesContext
+                .getCurrentInstance()
+                .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, null));
+    }
 }

@@ -5,23 +5,31 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class DetailSubmitForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotBlank(message = "承認者を入力してください")
-    private String approverName;
+    private String loginUserId;
 
-    @NotBlank(message = "検閲者を入力してください")
-    private String reviewerName;
+    @NotNull(message = "承認者IDを入力してください")
+    @Positive(message = "承認者IDは1以上の数値で入力してください")
+    private Long approverId;
+
+    @NotNull(message = "検閲者IDを入力してください")
+    @Positive(message = "検閲者IDは1以上の数値で入力してください")
+    private Long reviewerId;
 
     private final Map<Long, Boolean> selected = new LinkedHashMap<>();
+  
 
     public List<Long> getSelectedIds() {
         return selected.entrySet().stream()

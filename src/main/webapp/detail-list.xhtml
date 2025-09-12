@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 <h:head>
   <title>明細一覧</title>
   <h:outputStylesheet library="webjars" name="bootstrap/5.3.8/css/bootstrap.min.css" />
@@ -9,26 +10,51 @@
 <h:body class="p-4 bg-light">
 
   <div class="container">
-    <h1 class="h3 mb-3">明細一覧</h1>
+
+    <f:metadata>
+      <f:viewParam name="userId" value="#{detailListBean.form.loginUserId}" />
+    </f:metadata>
 
     <h:form id="form" styleClass="card shadow-sm">
       <div class="card-body">
 
-        <h:messages globalOnly="true" styleClass="alert alert-info" />
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h:panelGroup id="currentuser" layout="block" styleClass="alert alert-secondary py-2 px-3 mb-0">
+            現在のユーザー：<strong><h:outputText value="#{detailListBean.form.loginUserId}" /></strong>
+          </h:panelGroup>
 
-        <h:dataTable value="#{detailListBean.rows}" var="row"
+          <div class="d-flex align-items-center gap-2">
+            <label for="userSelect" class="form-label mb-0">ユーザー切替</label>
+            <h:selectOneMenu id="userSelect"
+                             value="#{detailListBean.form.loginUserId}"
+                             styleClass="form-select">
+              <f:selectItem itemValue="user1" itemLabel="user1" />
+              <f:selectItem itemValue="user2" itemLabel="user2" />
+              <f:selectItem itemValue="user3" itemLabel="user3" />
+              <f:ajax execute="@this"
+                      listener="#{detailListBean.init}"
+                      render="form:currentuser form:dataTable form:approver form:reviewer form:msgs" />
+            </h:selectOneMenu>
+          </div>
+        </div>
+
+        <h1 class="h3 mb-3">明細一覧</h1>
+
+        <h:messages id="msgs" globalOnly="true" styleClass="alert alert-info" />
+
+        <h:dataTable id="dataTable"
+                     value="#{detailListBean.rows}" var="row"
                      styleClass="table table-striped table-hover align-middle"
-                     headerClass="table-light"
-                     rowClasses="">
+                     headerClass="table-light">
 
           <h:column>
             <f:facet name="header">選択</f:facet>
-            <h:selectBooleanCheckbox value="#{detailListBean.form.selected[row.id]}" />
+            <h:selectBooleanCheckbox value="#{detailListBean.form.selected[row.detailId]}" />
           </h:column>
 
           <h:column>
             <f:facet name="header">ID</f:facet>
-            #{row.id}
+            #{row.detailId}
           </h:column>
 
           <h:column>
@@ -42,29 +68,31 @@
           </h:column>
         </h:dataTable>
 
-        <div class="row g-3 mb-3">
-          <div class="col-md-12">
-            <h:outputLabel for="approver" value="承認者" styleClass="form-label"/>
-            <h:inputText id="approver"
-                        value="#{detailListBean.form.approverName}"
-                        required="true"
-                        requiredMessage="承認者を入力してください"
-                        styleClass="form-control"/>
-            <h:messages for="approver" styleClass="text-danger small"/>
-          </div>
-
-          <div class="col-md-12">
-            <h:outputLabel for="reviewer" value="検閲者" styleClass="form-label"/>
-            <h:inputText id="reviewer"
-                        value="#{detailListBean.form.reviewerName}"
-                        required="true"
-                        requiredMessage="検閲者を入力してください"
-                        styleClass="form-control"/>
-            <h:messages for="reviewer" styleClass="text-danger small"/>
-          </div>
+        <div class="col-md-12">
+          <h:outputLabel for="approver" value="承認者ID" styleClass="form-label"/>
+          <h:inputText id="approver"
+                       value="#{detailListBean.form.approverId}"
+                       required="true"
+                       requiredMessage="承認者のIDを入力してください"
+                       converterMessage="承認者IDは数字で入力してください"
+                       styleClass="form-control"
+                       a:type="number" a:inputmode="numeric" a:min="1" a:step="1"/>
+          <h:message for="approver" styleClass="text-danger small"/>
         </div>
 
-        <div class="d-flex gap-2">
+        <div class="col-md-12">
+          <h:outputLabel for="reviewer" value="検閲者ID" styleClass="form-label"/>
+          <h:inputText id="reviewer"
+                       value="#{detailListBean.form.reviewerId}"
+                       required="true"
+                       requiredMessage="検閲者のIDを入力してください"
+                       converterMessage="検閲者IDは数字で入力してください"
+                       styleClass="form-control"
+                       a:type="number" a:inputmode="numeric" a:min="1" a:step="1"/>
+          <h:message for="reviewer" styleClass="text-danger small"/>
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
           <h:commandButton value="申請"
                            action="#{detailListBean.submit}"
                            styleClass="btn btn-primary" />
@@ -73,8 +101,10 @@
                            immediate="true"
                            styleClass="btn btn-outline-secondary" />
         </div>
+
       </div>
     </h:form>
+
   </div>
 
 </h:body>

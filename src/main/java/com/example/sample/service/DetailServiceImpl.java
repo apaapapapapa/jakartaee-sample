@@ -18,42 +18,42 @@ public class DetailServiceImpl implements DetailService {
     private DetailRepository detailRepository;
 
     @Inject
-    public DetailServiceImpl(DetailRepository detailRepository){
+    public DetailServiceImpl(final DetailRepository detailRepository){
         this.detailRepository = detailRepository;
     }
 
     @Override
     @Transactional(Transactional.TxType.SUPPORTS)
-    public List<DetailRowView> getListForLoginUser(String userId) {
+    public List<DetailRowView> getListForLoginUser(final String userId) {
         return detailRepository.findByUserId(userId).stream()
-                .map(d -> new DetailRowView(d.getId(), d.getTitle(), toLabel(d.getStatus())))
+                .map(detail -> new DetailRowView(detail.getDetailId(), detail.getTitle(), toLabel(detail.getStatus())))
                 .toList();
     }
 
     @Override
     @Transactional(Transactional.TxType.REQUIRED)
-    public void apply(List<Long> selectedDetailIds, String userId) {
+    public void apply(final List<Long> selectedDetailIds, final String userId) {
         if (selectedDetailIds == null || selectedDetailIds.isEmpty()) {
             throw new BusinessException("申請する明細を1件以上選択してください。");
         }
-        var targets = detailRepository.findByIdsForUser(selectedDetailIds, userId);
+        final List<Detail> targets = detailRepository.findByIdsForUser(selectedDetailIds, userId);
         if (targets.isEmpty()) {
             throw new BusinessException("申請対象の明細が見つかりません。");
         }
         // すべて DRAFT のものだけ申請可能
-        for (Detail d : targets) {
-            if (d.getStatus() != Status.DRAFT) {
-                throw new BusinessException("申請できない状態の明細が含まれています（ID: " + d.getId() + "）。");
+        for (final Detail detail : targets) {
+            if (detail.getStatus() != Status.DRAFT) {
+                throw new BusinessException("申請できない状態の明細が含まれています（ID: " + detail.getDetailId() + "）。");
             }
         }
         // 申請へ状態遷移（悲観ロックで競合対策）
-        for (Detail d : targets) {
-            detailRepository.markRequestedWithLock(d);
+        for (final Detail detail : targets) {
+            detailRepository.markRequestedWithLock(detail);
         }
     }
 
-    private String toLabel(Status s) {
-        return switch (s) {
+    private String toLabel(final Status status) {
+        return switch (status) {
             case DRAFT -> "下書き";
             case REQUESTED -> "申請中";
             case APPROVED -> "承認済み";

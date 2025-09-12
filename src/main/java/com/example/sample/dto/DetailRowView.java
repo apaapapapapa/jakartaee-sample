@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class DetailRowView {
 
-    private Long id;
+    private Long detailId;
 
     private String title;
 
@@ -15,10 +15,10 @@ public class DetailRowView {
 
     private boolean selected;
 
-    public DetailRowView(Long id, String title, String status) {
-        this.id = id;
-        this.title = title;
-        this.status = status;
-    }
+public DetailRowView(final Long detailId, final String title, final String status) {
+    this.detailId = detailId;
+    this.title = title;
+    this.status = status;
+}
 
 }
