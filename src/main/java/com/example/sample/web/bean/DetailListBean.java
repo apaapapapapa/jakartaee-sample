@@ -15,6 +15,7 @@ import java.util.List;
 import com.example.sample.dto.DetailRowView;
 import com.example.sample.dto.DetailSubmitForm;
 import com.example.sample.exception.BusinessException;
+import com.example.sample.model.Status;
 import com.example.sample.service.DetailService;
 
 @Named
@@ -23,7 +24,10 @@ public class DetailListBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private DetailService detailService;
+    private static final String DEFAULT_USERID = "user1";
+
+    private final DetailService detailService;
+    private final FacesContext facesContext;
 
     @Getter
     @Setter
@@ -31,66 +35,86 @@ public class DetailListBean implements Serializable {
 
     @Getter
     @Setter
-    private DetailSubmitForm form;
+    private DetailSubmitForm form = new DetailSubmitForm();
 
-    /**
-     * Default constructor.
-     */
+    private boolean initialized;
+
     @Inject
-    public DetailListBean(final DetailService detailService) {
+    public DetailListBean(final DetailService detailService, final FacesContext facesContext) {
         this.detailService = detailService;
-        this.form = new DetailSubmitForm();
+        this.facesContext = facesContext;
     }
 
     @PostConstruct
     public void init() {
         String userId = form.getLoginUserId();
         if (userId == null || userId.isBlank()) {
-            userId = "user1";
-            form.setLoginUserId(userId);
+            form.setLoginUserId(DEFAULT_USERID);
         }
-        reloadRows(userId);
+        reloadRows();
     }
 
-    private void reloadRows(final String userId) {
-        rows = detailService.getListForLoginUser(userId);
-        final List<Long> idsOnScreen = rows.stream()
-                .map(DetailRowView::getDetailId)
-                .toList();
-        form.getSelected().keySet().retainAll(idsOnScreen);
-        idsOnScreen.forEach(detailId -> form.getSelected().putIfAbsent(detailId, false));
+    public void onPreRenderView() {
+        if (initialized) {
+            return;
+        }
+        init();
+        initialized = true;
+    }
+
+    public void onUserChange() {
+        form.clearSelections();
+        reloadRows();
+    }
+
+    public void onStatusFilterChange() {
+        form.clearSelections();
+        reloadRows();
+    }
+
+    public void onReload() {
+        reloadRows();
+        addMessage(FacesMessage.SEVERITY_INFO, "最新の一覧に更新しました。");
+    }
+
+    public Status[] getAllStatuses() {
+        return Status.values();
     }
 
     public void submit() {
         try {
             final String userId = form.getLoginUserId();
             final List<Long> selectedIds = form.getSelectedIds();
+
             detailService.apply(selectedIds, userId);
-            addInfo("申請が完了しました。");
-            reloadRows(userId);
+
+            addMessage(FacesMessage.SEVERITY_INFO, "申請が完了しました。");
             form.clearSelections();
+            reloadRows();
         } catch (final BusinessException ex) {
-            addWarn(ex.getMessage());
+            addMessage(FacesMessage.SEVERITY_WARN, ex.getMessage());
         } catch (final Exception ex) {
-            addError("エラーが発生しました。管理者に連絡してください。");
+            addMessage(FacesMessage.SEVERITY_ERROR, "エラーが発生しました。管理者に連絡してください。");
         }
     }
 
-    private void addInfo(final String msg) {
-        FacesContext
-                .getCurrentInstance()
-                .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, msg, null));
+    // ===== private helpers =====
+
+    private void reloadRows() {
+        final String userId = form.getLoginUserId();
+        rows = detailService.getListForLoginUser(userId, form.getFilterStatus());
+        syncSelectionsWithRows();
     }
 
-    private void addWarn(final String msg) {
-        FacesContext
-                .getCurrentInstance()
-                .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, msg, null));
+    private void syncSelectionsWithRows() {
+        final List<Long> idsOnScreen = rows.stream()
+            .map(DetailRowView::getDetailId)
+            .toList();
+        form.getSelected().keySet().retainAll(idsOnScreen);
+        idsOnScreen.forEach(id -> form.getSelected().putIfAbsent(id, false));
     }
 
-    private void addError(final String msg) {
-        FacesContext
-                .getCurrentInstance()
-                .addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, null));
+    private void addMessage(final FacesMessage.Severity sev, final String msg) {
+        facesContext.addMessage(null, new FacesMessage(sev, msg, null));
     }
 }

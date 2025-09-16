@@ -9,41 +9,65 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
-import lombok.NoArgsConstructor;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
-@NoArgsConstructor
 public class DetailRepository {
 
     @PersistenceContext
-    private EntityManager entityManager;
-
+    private EntityManager em;
+    
+    private static final String USER_ID_PARAM = "userId";
 
     public List<Detail> findByUserId(final String userId) {
-        return entityManager.createQuery(
-                "SELECT d FROM Detail d WHERE d.ownerUserId = :uid ORDER BY d.id DESC",
-                Detail.class
-        ).setParameter("uid", userId).getResultList();
+        requireUserId(userId);
+        return em.createQuery(
+                "SELECT d FROM Detail d WHERE d.ownerUserId = :userId ORDER BY d.detailId DESC",
+                Detail.class)
+            .setParameter(USER_ID_PARAM, userId)
+            .getResultList();
     }
 
-    public List<Detail> findByIdsForUser(final List<Long> ids, final String userId) {
-        final List<Detail> result;
-        if (ids == null || ids.isEmpty()) {
-            result = List.of();
-        } else {
-            result = entityManager.createQuery(
-                    "SELECT d FROM Detail d WHERE d.id IN :ids AND d.ownerUserId = :uid",
-                    Detail.class
-            ).setParameter("ids", ids)
-             .setParameter("uid", userId)
-             .getResultList();
+    public List<Detail> findByUserIdAndStatus(final String userId, final Status status) {
+        requireUserId(userId);
+        if (status == null) {
+            return findByUserId(userId);
         }
-        return result;
+        return em.createQuery(
+                "SELECT d FROM Detail d WHERE d.ownerUserId = :userId AND d.status = :status ORDER BY d.detailId DESC",
+                Detail.class)
+            .setParameter(USER_ID_PARAM, userId)
+            .setParameter("status", status)
+            .getResultList();
     }
 
-    public void markRequestedWithLock(final Detail detail) {
-        entityManager.lock(detail, LockModeType.PESSIMISTIC_WRITE);
-        detail.setStatus(Status.REQUESTED);
-        entityManager.merge(detail);
+    public List<Detail> findByDetailIdInAndOwnerUserId(final List<Long> ids, final String userId) {
+        requireUserId(userId);
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        return em.createQuery(
+                "SELECT d FROM Detail d WHERE d.detailId IN :ids AND d.ownerUserId = :userId",
+                Detail.class)
+            .setParameter("ids", ids)
+            .setParameter(USER_ID_PARAM, userId)
+            .getResultList();
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void lockAndMarkRequested(final Long detailId, final String userId) {
+        requireUserId(userId);
+        final Detail managed = em.find(Detail.class, detailId, LockModeType.PESSIMISTIC_WRITE);
+        if (managed == null || !userId.equals(managed.getOwnerUserId())) {
+            throw new IllegalArgumentException("対象が存在しないか、ユーザー不一致: id=" + detailId);
+        }
+        managed.setStatus(Status.REQUESTED);
+        em.flush();
+    }
+
+    private static void requireUserId(String userId) {
+        if (userId == null || userId.isBlank()) {
+            throw new IllegalArgumentException("userId is required");
+        }
     }
 }

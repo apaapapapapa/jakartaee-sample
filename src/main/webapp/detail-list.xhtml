@@ -3,23 +3,24 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
-      
+
+<!-- ★ f:metadata はビュー直下に置く -->
+<f:metadata>
+  <f:viewParam name="userId" value="#{detailListBean.form.loginUserId}" />
+  <f:event type="preRenderView" listener="#{detailListBean.init}" />
+</f:metadata>
+
 <h:head>
   <title>明細一覧</title>
   <h:outputStylesheet library="webjars" name="bootstrap/5.3.8/css/bootstrap.min.css" />
 </h:head>
 
-<f:metadata>
-    <f:viewParam name="userId" value="#{detailListBean.form.loginUserId}" />
-</f:metadata>
-
 <h:body class="p-4 bg-light">
-
   <div class="container">
-
     <h:form id="form" styleClass="card shadow-sm">
       <div class="card-body">
 
+        <!-- ヘッダ行：現在ユーザー + ユーザー切替 -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
 
           <h:panelGroup id="currentuser"
@@ -35,20 +36,38 @@
             <div class="input-group input-group-sm" style="min-width: 240px;">
               <span class="input-group-text">ユーザー切替</span>
               <h:selectOneMenu id="userSelect"
-                              value="#{detailListBean.form.loginUserId}"
-                              styleClass="form-select">
+                               value="#{detailListBean.form.loginUserId}"
+                               styleClass="form-select">
                 <f:selectItem itemValue="user1" itemLabel="user1" />
                 <f:selectItem itemValue="user2" itemLabel="user2" />
                 <f:selectItem itemValue="user3" itemLabel="user3" />
+                <!-- ★ ユーザー変更時 -->
                 <f:ajax execute="@this"
-                        listener="#{detailListBean.init}"
-                        render="form:currentuser form:dataTable form:approver form:reviewer form:msgs" />
+                        listener="#{detailListBean.onUserChange}"
+                        render="form:currentuser form:dataTable form:msgs form:approver form:reviewer" />
               </h:selectOneMenu>
             </div>
           </div>
 
         </div>
 
+        <!-- ステータス絞り込み -->
+        <div class="col-md-3 mb-3">
+          <h:outputLabel for="status" value="状態で絞り込み" styleClass="form-label fw-semibold mb-1"/>
+          <h:selectOneMenu id="status"
+                           value="#{detailListBean.form.filterStatus}"
+                           styleClass="form-select form-select-sm">
+            <f:selectItem itemValue="#{null}" itemLabel="すべて" />
+            <f:selectItems value="#{detailListBean.allStatuses}"
+                           var="st"
+                           itemValue="#{st}"
+                           itemLabel="#{st.label}" />
+            <!-- ★ ステータス変更時 -->
+            <f:ajax execute="@this"
+                    listener="#{detailListBean.onStatusFilterChange}"
+                    render="form:dataTable form:msgs form:currentuser"/>
+          </h:selectOneMenu>
+        </div>
 
         <h1 class="h3 mb-3">明細一覧</h1>
 
@@ -109,15 +128,13 @@
                            action="#{detailListBean.submit}"
                            styleClass="btn btn-primary" />
           <h:commandButton value="再読込"
-                           action="#{detailListBean.init}"
+                           action="#{detailListBean.onReload}"
                            immediate="true"
                            styleClass="btn btn-outline-secondary" />
         </div>
 
       </div>
     </h:form>
-
   </div>
-
 </h:body>
 </html>
