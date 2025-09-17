@@ -1,0 +1,3 @@
+batch
+/subsystem=datasources/data-source=ExampleDS:write-attribute(name=connection-url,value="jdbc:h2:file:${app.db.dir}/sample;AUTO_SERVER=TRUE")
+run-batch

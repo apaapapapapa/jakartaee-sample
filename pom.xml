@@ -22,6 +22,7 @@
         <version.lombok>1.18.34</version.lombok>
         <version.mockito>5.14.1</version.mockito>
         <version.pmd.plugin>3.22.0</version.pmd.plugin>
+        <version.resource.plugin>3.3.1</version.resource.plugin>
         <version.spotbugs.plugin>4.8.6.6</version.spotbugs.plugin>
         <version.surefire.plugin>3.5.0</version.surefire.plugin>
         <version.wildfly>33.0.2.Final</version.wildfly>
@@ -127,6 +128,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -260,6 +267,14 @@
                             <plugin-options>
                                 <jboss-fork-embedded>true</jboss-fork-embedded>
                             </plugin-options>
+                            <cli-sessions>
+                                <cli-session>
+                                    <script-files>
+                                    <script>src/main/wildfly/cli/datasource.cli</script>
+                                    </script-files>
+                                    <resolve-expressions>true</resolve-expressions>
+                                </cli-session>
+                            </cli-sessions>
                         </configuration>
                         <executions>
                             <execution>
