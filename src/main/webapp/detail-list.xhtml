@@ -4,7 +4,6 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
 
-<!-- ★ f:metadata はビュー直下に置く -->
 <f:metadata>
   <f:viewParam name="userId" value="#{detailListBean.form.loginUserId}" />
   <f:event type="preRenderView" listener="#{detailListBean.init}" />
@@ -20,18 +19,7 @@
     <h:form id="form" styleClass="card shadow-sm">
       <div class="card-body">
 
-        <!-- ヘッダ行：現在ユーザー + ユーザー切替 -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-
-          <h:panelGroup id="currentuser"
-                        layout="block"
-                        styleClass="alert alert-secondary d-flex align-items-center gap-2 py-2 px-3 mb-0 shadow-sm">
-            <span class="fw-semibold">現在のユーザー：</span>
-            <span class="badge text-bg-light text-secondary fs-6">
-              <h:outputText value="#{detailListBean.form.loginUserId}" />
-            </span>
-          </h:panelGroup>
-
           <div class="d-flex align-items-center">
             <div class="input-group input-group-sm" style="min-width: 240px;">
               <span class="input-group-text">ユーザー切替</span>
@@ -41,32 +29,32 @@
                 <f:selectItem itemValue="user1" itemLabel="user1" />
                 <f:selectItem itemValue="user2" itemLabel="user2" />
                 <f:selectItem itemValue="user3" itemLabel="user3" />
-                <!-- ★ ユーザー変更時 -->
                 <f:ajax execute="@this"
-                        listener="#{detailListBean.onUserChange}"
+                        listener="#{detailListBean.onUserStatusFilterChange}"
                         render="form:currentuser form:dataTable form:msgs form:approver form:reviewer" />
               </h:selectOneMenu>
             </div>
           </div>
-
         </div>
 
-        <!-- ステータス絞り込み -->
-        <div class="col-md-3 mb-3">
-          <h:outputLabel for="status" value="状態で絞り込み" styleClass="form-label fw-semibold mb-1"/>
-          <h:selectOneMenu id="status"
-                           value="#{detailListBean.form.filterStatus}"
-                           styleClass="form-select form-select-sm">
-            <f:selectItem itemValue="#{null}" itemLabel="すべて" />
-            <f:selectItems value="#{detailListBean.allStatuses}"
-                           var="st"
-                           itemValue="#{st}"
-                           itemLabel="#{st.label}" />
-            <!-- ★ ステータス変更時 -->
-            <f:ajax execute="@this"
-                    listener="#{detailListBean.onStatusFilterChange}"
-                    render="form:dataTable form:msgs form:currentuser"/>
-          </h:selectOneMenu>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+          <div class="d-flex align-items-center">
+            <div class="input-group input-group-sm" style="min-width: 240px;">
+              <span class="input-group-text">ステータス切替</span>
+              <h:selectOneMenu id="status"
+                              value="#{detailListBean.form.filterStatus}"
+                              styleClass="form-select form-select-sm">
+                <f:selectItem itemValue="#{null}" itemLabel="すべて" />
+                <f:selectItems value="#{detailListBean.allStatuses}"
+                              var="st"
+                              itemValue="#{st}"
+                              itemLabel="#{st.label}" />
+                <f:ajax execute="@this"
+                        listener="#{detailListBean.onUserStatusFilterChange}"
+                        render="form:dataTable form:msgs form:currentuser"/>
+              </h:selectOneMenu>
+            </div>
+          </div>
         </div>
 
         <h1 class="h3 mb-3">明細一覧</h1>
@@ -103,8 +91,6 @@
           <h:outputLabel for="approver" value="承認者ID" styleClass="form-label"/>
           <h:inputText id="approver"
                        value="#{detailListBean.form.approverId}"
-                       required="true"
-                       requiredMessage="承認者のIDを入力してください"
                        converterMessage="承認者IDは数字で入力してください"
                        styleClass="form-control"
                        a:type="number" a:inputmode="numeric" a:min="1" a:step="1"/>
@@ -115,8 +101,6 @@
           <h:outputLabel for="reviewer" value="検閲者ID" styleClass="form-label"/>
           <h:inputText id="reviewer"
                        value="#{detailListBean.form.reviewerId}"
-                       required="true"
-                       requiredMessage="検閲者のIDを入力してください"
                        converterMessage="検閲者IDは数字で入力してください"
                        styleClass="form-control"
                        a:type="number" a:inputmode="numeric" a:min="1" a:step="1"/>
@@ -132,7 +116,6 @@
                            immediate="true"
                            styleClass="btn btn-outline-secondary" />
         </div>
-
       </div>
     </h:form>
   </div>

@@ -62,12 +62,7 @@ public class DetailListBean implements Serializable {
         initialized = true;
     }
 
-    public void onUserChange() {
-        form.clearSelections();
-        reloadRows();
-    }
-
-    public void onStatusFilterChange() {
+    public void onUserStatusFilterChange() {
         form.clearSelections();
         reloadRows();
     }
