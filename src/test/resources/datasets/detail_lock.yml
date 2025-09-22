@@ -1,0 +1,11 @@
+detail:
+  - id: 201
+    title: "旅費"
+    status: "DRAFT"
+    owner_user_id: "user1"
+    version: 0
+  - id: 202
+    title: "備品"
+    status: "APPROVED"
+    owner_user_id: "user2"
+    version: 0

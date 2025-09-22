@@ -109,13 +109,26 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- DatabaseRider -->
+        <!-- DatabaseRider --> 
         <dependency>
             <groupId>com.github.database-rider</groupId>
             <artifactId>rider-junit5</artifactId>
             <version>${version.database.rider}</version>
-            <classifier>jakarta</classifier>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.database-rider</groupId>
+                    <artifactId>rider-core</artifactId>
+                </exclusion>
+            </exclusions>
+            <classifier>jakarta</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.database-rider</groupId>
+            <artifactId>rider-core</artifactId>
+            <version>${version.database.rider}</version>
+            <scope>test</scope>
+            <classifier>jakarta</classifier>
         </dependency>
 
         <!-- Bootstrap -->

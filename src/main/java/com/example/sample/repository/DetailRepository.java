@@ -6,16 +6,22 @@ import com.example.sample.model.Detail;
 import com.example.sample.model.Status;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import lombok.NoArgsConstructor;
 
 @ApplicationScoped
+@NoArgsConstructor // Weldの制約で引数なしコンストラクタも必要
 public class DetailRepository {
 
-    @PersistenceContext
     private EntityManager em;
+
+    @Inject
+    public DetailRepository(EntityManager em) {
+        this.em = em;
+    }
     
     private static final String USER_ID_PARAM = "userId";
 

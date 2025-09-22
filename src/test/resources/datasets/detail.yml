@@ -1,0 +1,16 @@
+detail:
+  - id: 101
+    title: "旅費精算"
+    status: "REQUESTED"
+    owner_user_id: "user1"
+    version: 0
+  - id: 102
+    title: "会議費"
+    status: "APPROVED"
+    owner_user_id: "user2"
+    version: 0
+  - id: 103
+    title: "交際費"
+    status: "REQUESTED"
+    owner_user_id: "user1"
+    version: 0
