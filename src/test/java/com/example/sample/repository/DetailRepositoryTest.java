@@ -32,7 +32,7 @@ class DetailRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        em = EntityManagerProvider.em();
+        em = emProvider.getEm();
         target = new DetailRepository(em);
     }
 
