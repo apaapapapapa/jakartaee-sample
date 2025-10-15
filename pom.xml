@@ -18,6 +18,7 @@
         <version.compiler.plugin>3.11.0</version.compiler.plugin>
         <version.database.rider>1.44.0</version.database.rider>
         <version.jacoco>0.8.13</version.jacoco>
+        <version.jakarta.el-api>6.0.1</version.jakarta.el-api>
         <version.junit>5.11.2</version.junit>
         <version.lombok>1.18.34</version.lombok>
         <version.mockito>5.14.1</version.mockito>
@@ -106,6 +107,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>${version.mockito}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.el</groupId>
+            <artifactId>jakarta.el-api</artifactId>
+            <version>${version.jakarta.el-api}</version>
             <scope>test</scope>
         </dependency>
 
